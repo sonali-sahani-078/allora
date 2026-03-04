@@ -1,4 +1,6 @@
-import { FormEvent, useState } from "react";
+import {  useState } from "react";
+import type {  FormEvent } from "react";
+
 import { Link } from "react-router-dom";
 import "./Contact.css";
 
@@ -20,7 +22,7 @@ const initialForm: ContactFormData = {
   message: "",
 };
 
-const appsScriptUrl = import.meta.env.VITE_CONTACT_APPS_SCRIPT_URL as string | undefined;
+const web3FormsAccessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY as string | undefined;
 
 function Contact() {
   const [form, setForm] = useState<ContactFormData>(initialForm);
@@ -29,23 +31,48 @@ function Contact() {
 
   const isSubmitting = submitState === "submitting";
 
-  const submitToAppScript = async (payload: ContactFormData) => {
-    if (!appsScriptUrl) {
-      throw new Error("Missing Apps Script URL.");
+  const submitToWeb3Forms = async (payload: ContactFormData) => {
+    if (!web3FormsAccessKey) {
+      throw new Error("Missing Web3Forms access key.");
     }
 
-    const response = await fetch(appsScriptUrl, {
+    const response = await fetch("https://api.web3forms.com/submit", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
       body: JSON.stringify({
-        ...payload,
+        access_key: web3FormsAccessKey,
+        name: payload.name,
+        from_name: payload.name,
+        subject: payload.subject,
+        replyto: payload.email,
+        phone: payload.phone,
+        email: payload.email,
+        message: payload.message,
         source: "allora-contact-page",
-        submittedAt: new Date().toISOString(),
       }),
     });
 
     if (!response.ok) {
-      throw new Error("Failed to store message in Google Sheet.");
+      throw new Error("Failed to submit contact form.");
+    }
+
+    const responseText = await response.text();
+    if (!responseText) {
+      throw new Error("Empty response from Web3Forms.");
+    }
+
+    let parsed: { success?: boolean; message?: string };
+    try {
+      parsed = JSON.parse(responseText) as { success?: boolean; message?: string };
+    } catch {
+      throw new Error("Invalid JSON response from Web3Forms.");
+    }
+
+    if (!parsed.success) {
+      throw new Error(parsed.message || "Web3Forms returned unsuccessful response.");
     }
   };
 
@@ -55,15 +82,15 @@ function Contact() {
     setStatusMessage("");
 
     try {
-      await submitToAppScript(form);
+      await submitToWeb3Forms(form);
       setSubmitState("success");
       setStatusMessage("Thanks, your message has been sent.");
       setForm(initialForm);
-    } catch {
+    } catch (error) {
+      console.error("Contact submit failed:", error);
+      const message = error instanceof Error ? error.message : "Unknown submit error.";
       setSubmitState("error");
-      setStatusMessage(
-        "Unable to send right now. Check Apps Script URL and deployment access, then try again.",
-      );
+      setStatusMessage(`Unable to send: ${message}`);
     }
   };
 
