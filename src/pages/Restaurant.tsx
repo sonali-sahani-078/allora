@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import "./Restaurant.css";
 import { RESTAURANT_PAGE_QUERY } from "../lib/queries";
@@ -31,9 +31,29 @@ type CartItem = {
   qty: number;
 };
 
-type TabKey = "signature" | "build" | "sides" | "drinks";
+type TabKey = "signature" | "build" | "sides" | "drinks" | "reservation";
 type DietaryFilter = "all" | "vegan" | "glutenFree" | "dairyFree";
 type SpiceFilter = "all" | "mild" | "spicy" | "extraHot";
+type ReservationStatus = { kind: "success" | "error"; message: string };
+
+const reservationSlots = [
+  "11:30",
+  "12:00",
+  "12:30",
+  "13:00",
+  "18:00",
+  "18:30",
+  "19:00",
+  "19:30",
+  "20:00",
+  "20:30",
+  "21:00",
+];
+
+const web3FormsEndpoint = "https://api.web3forms.com/submit";
+const web3FormsAccessKey =
+  import.meta.env.VITE_WEB3FORMS_ACCESS_KEY ?? "b00e87dc-2490-4708-a404-c13e34c4d963";
+
 
 const sideItems: SideItem[] = [
   {
@@ -77,6 +97,29 @@ const parsePrice = (value?: string): number => {
   return Number.isNaN(numeric) ? 0 : numeric;
 };
 
+const todayLocalDate = () => new Date().toISOString().split("T")[0];
+
+const getFallbackSlots = (date: string, locallyBooked: Record<string, string[]>) => {
+  const now = new Date();
+  const isToday = date === todayLocalDate();
+  const booked = new Set(locallyBooked[date] ?? []);
+
+  return reservationSlots.filter((slot) => {
+    if (booked.has(slot)) {
+      return false;
+    }
+
+    if (!isToday) {
+      return true;
+    }
+
+    const [hour, minute] = slot.split(":").map((value) => Number.parseInt(value, 10));
+    const slotDate = new Date(now);
+    slotDate.setHours(hour, minute, 0, 0);
+    return slotDate > now;
+  });
+};
+
 const getDishTags = (dish: SignatureDish) => {
   const text = `${dish.name ?? ""} ${dish.description ?? ""}`.toLowerCase();
 
@@ -100,6 +143,16 @@ function Restaurant() {
   const [spice, setSpice] = useState<SpiceFilter>("all");
   const [swipeProgress, setSwipeProgress] = useState(0);
   const [orderMessage, setOrderMessage] = useState("");
+  const [reservationDate, setReservationDate] = useState(todayLocalDate);
+  const [reservationTime, setReservationTime] = useState("");
+  const [guestCount, setGuestCount] = useState(2);
+  const [reservationName, setReservationName] = useState("");
+  const [reservationPhone, setReservationPhone] = useState("");
+  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+  const [isSubmittingReservation, setIsSubmittingReservation] = useState(false);
+  const [reservationStatus, setReservationStatus] = useState<ReservationStatus | null>(null);
+  const [locallyBookedSlots, setLocallyBookedSlots] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     if (!hasSanityConfig) {
@@ -115,6 +168,13 @@ function Restaurant() {
         setData(null);
       });
   }, []);
+
+  useEffect(() => {
+    const fallback = getFallbackSlots(reservationDate, locallyBookedSlots);
+    setIsLoadingSlots(false);
+    setAvailableSlots(fallback);
+    setReservationTime((prev) => (fallback.includes(prev) ? prev : fallback[0] ?? ""));
+  }, [guestCount, locallyBookedSlots, reservationDate]);
 
   const content = mergeRestaurantPageData(data);
 
@@ -230,7 +290,9 @@ function Restaurant() {
         ? "Build Your Own"
         : tab === "sides"
           ? "allora Sides"
-          : "Drinks";
+          : tab === "drinks"
+            ? "Drinks"
+            : "Table Reservations";
 
   const contentCount =
     tab === "signature"
@@ -239,7 +301,75 @@ function Restaurant() {
         ? "Pick your custom combo"
         : tab === "sides"
           ? `${sideItems.length} items available`
-          : `${drinkItems.length} items available`;
+          : tab === "drinks"
+            ? `${drinkItems.length} items available`
+            : "Book your table in seconds";
+
+  const submitReservation = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setReservationStatus(null);
+
+    if (!reservationDate || !reservationTime || !reservationName.trim() || !reservationPhone.trim()) {
+      setReservationStatus({ kind: "error", message: "Please complete all reservation fields." });
+      return;
+    }
+
+    if (!web3FormsAccessKey) {
+      setReservationStatus({ kind: "error", message: "Missing Web3Forms access key." });
+      return;
+    }
+
+    if (!availableSlots.includes(reservationTime)) {
+      setReservationStatus({ kind: "error", message: "Please choose an available time slot." });
+      return;
+    }
+
+    setIsSubmittingReservation(true);
+
+    try {
+      const payload = {
+        access_key: web3FormsAccessKey,
+        subject: "New Table Reservation - allora",
+        from_name: "allora Website",
+        reservation_date: reservationDate,
+        reservation_time: reservationTime,
+        guests: String(guestCount),
+        customer_name: reservationName.trim(),
+        customer_phone: reservationPhone.trim(),
+        message: `Reservation request from ${reservationName.trim()} (${reservationPhone.trim()}) for ${guestCount} guest(s) on ${reservationDate} at ${reservationTime}.`,
+      };
+
+      const response = await fetch(web3FormsEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = (await response.json()) as { success?: boolean; message?: string };
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message ?? "Reservation request failed.");
+      }
+
+      setLocallyBookedSlots((prev) => ({
+        ...prev,
+        [reservationDate]: [...(prev[reservationDate] ?? []), reservationTime],
+      }));
+      setReservationStatus({
+        kind: "success",
+        message: `Reservation submitted for ${reservationDate} at ${reservationTime}. We will contact you to confirm.`,
+      });
+      setReservationName("");
+      setReservationPhone("");
+    } catch {
+      setReservationStatus({
+        kind: "error",
+        message: "Reservation could not be submitted. Please try again in a moment.",
+      });
+    } finally {
+      setIsSubmittingReservation(false);
+    }
+  };
 
   return (
     <div className="ac-page">
@@ -314,6 +444,7 @@ function Restaurant() {
               <button className={tab === "build" ? "is-current" : ""} type="button" onClick={() => setTab("build")}>Build Your Own</button>
               <button className={tab === "sides" ? "is-current" : ""} type="button" onClick={() => setTab("sides")}>Sides</button>
               <button className={tab === "drinks" ? "is-current" : ""} type="button" onClick={() => setTab("drinks")}>Drinks</button>
+              <button className={tab === "reservation" ? "is-current" : ""} type="button" onClick={() => setTab("reservation")}>Reservations</button>
             </div>
 
             <div className="ac-title-row">
@@ -433,6 +564,91 @@ function Restaurant() {
                     </button>
                   </article>
                 ))}
+              </section>
+            ) : null}
+
+            {tab === "reservation" ? (
+              <section className="ac-reservation">
+                <form className="ac-reservation-form" onSubmit={submitReservation}>
+                  <div className="ac-reservation-grid">
+                    <label>
+                      Date
+                      <input
+                        type="date"
+                        min={todayLocalDate()}
+                        value={reservationDate}
+                        onChange={(event) => setReservationDate(event.target.value)}
+                        required
+                      />
+                    </label>
+
+                    <label>
+                      Number of Guests
+                      <select
+                        value={guestCount}
+                        onChange={(event) => setGuestCount(Number(event.target.value))}
+                      >
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map((count) => (
+                          <option key={count} value={count}>
+                            {count} Guest{count > 1 ? "s" : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label>
+                      Time Slot
+                      <select
+                        value={reservationTime}
+                        onChange={(event) => setReservationTime(event.target.value)}
+                        disabled={isLoadingSlots || availableSlots.length === 0}
+                        required
+                      >
+                        {availableSlots.length === 0 ? (
+                          <option value="">{isLoadingSlots ? "Loading slots..." : "No slots available"}</option>
+                        ) : (
+                          availableSlots.map((slot) => (
+                            <option key={slot} value={slot}>
+                              {slot}
+                            </option>
+                          ))
+                        )}
+                      </select>
+                    </label>
+
+                    <label>
+                      Full Name
+                      <input
+                        type="text"
+                        value={reservationName}
+                        onChange={(event) => setReservationName(event.target.value)}
+                        placeholder="Your full name"
+                        required
+                      />
+                    </label>
+
+                    <label>
+                      Phone Number
+                      <input
+                        type="tel"
+                        value={reservationPhone}
+                        onChange={(event) => setReservationPhone(event.target.value)}
+                        placeholder="+1 555 123 4567"
+                        required
+                      />
+                    </label>
+                  </div>
+
+                  <button type="submit" disabled={isSubmittingReservation || availableSlots.length === 0}>
+                    {isSubmittingReservation ? "Confirming..." : "Reserve Table"}
+                  </button>
+                </form>
+
+                {reservationStatus ? (
+                  <p className={`ac-reservation-msg ${reservationStatus.kind === "success" ? "is-success" : "is-error"}`}>
+                    {reservationStatus.message}
+                  </p>
+                ) : null}
               </section>
             ) : null}
           </section>
