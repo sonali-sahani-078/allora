@@ -11,6 +11,42 @@ import {
   mergeHomePageData,
 } from "./homepage";
 
+const signatureHighlights = [
+  {
+    title: "Slow-Fermented Dough",
+    description: "48-hour fermentation for a crisp crust and airy center.",
+  },
+  {
+    title: "Seasonal Ingredients",
+    description: "Small-batch toppings sourced from trusted local partners.",
+  },
+  {
+    title: "Open Kitchen",
+    description: "Watch every pie fired to perfection in our stone oven.",
+  },
+];
+
+const testimonials = [
+  {
+    quote:
+      "The margherita tastes like Naples with a modern edge. Every bite feels intentional.",
+    name: "Sofia G.",
+    role: "Food Editor",
+  },
+  {
+    quote:
+      "Our Friday ritual: allora, two spritzes, and one extra order to take home.",
+    name: "Marcus L.",
+    role: "Regular Guest",
+  },
+  {
+    quote:
+      "Service is warm, the space is beautiful, and the crust is incredible.",
+    name: "Ava R.",
+    role: "Neighborhood Local",
+  },
+];
+
 function Home() {
   const [data, setData] = useState<HomePageData | null>(null);
 
@@ -82,7 +118,7 @@ function Home() {
             <a href="#menu">Menu</a>
             <a href="#story">Our Story</a>
             <a href="#locations">Locations</a>
-            <a href="#reviews">Reviews</a>
+            <a href="#testimonials">Reviews</a>
             <Link to="/contact">Contact Us</Link>
           </nav>
 
@@ -140,6 +176,21 @@ function Home() {
         </div>
       </section>
 
+      <section className="highlights" aria-label="signature highlights">
+        <div className="section-headline">
+          <h2>Crafted With Intention</h2>
+          <p>Every component is designed for flavor, balance, and a memorable table experience.</p>
+        </div>
+        <div className="highlight-grid">
+          {signatureHighlights.map((item) => (
+            <article className="highlight-card" key={item.title}>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="process" id="reviews">
         <h2>The allora Method</h2>
         <h3>How We Craft Your Pizza</h3>
@@ -178,6 +229,38 @@ function Home() {
         </div>
       </section>
 
+      <section className="testimonials" id="testimonials" aria-label="guest reviews">
+        <div className="section-headline">
+          <h2>What Guests Say</h2>
+          <p>Real words from people who keep coming back for the atmosphere and the flavor.</p>
+        </div>
+        <div className="testimonial-grid">
+          {testimonials.map((item) => (
+            <article className="testimonial-card" key={item.name}>
+              <p className="quote">"{item.quote}"</p>
+              <p className="author">{item.name}</p>
+              <p className="role">{item.role}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="newsletter" aria-label="newsletter signup">
+        <div>
+          <h2>Table Notes, Straight to Your Inbox</h2>
+          <p>Get seasonal specials, chef picks, and first access to limited weekly menus.</p>
+        </div>
+        <form className="newsletter-form" onSubmit={(event) => event.preventDefault()}>
+          <label htmlFor="newsletter-email" className="sr-only">
+            Email address
+          </label>
+          <input id="newsletter-email" type="email" placeholder="Enter your email" />
+          <button type="submit" className="primary-btn">
+            Subscribe
+          </button>
+        </form>
+      </section>
+
       <section className="cta" id="locations">
         <h2>{content.ctaTitle}</h2>
         <p>{content.ctaDescription}</p>
@@ -201,3 +284,4 @@ function Home() {
 }
 
 export default Home;
+

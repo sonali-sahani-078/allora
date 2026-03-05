@@ -11,8 +11,18 @@ const parseAssetRef = (ref: string): { id: string; ext: string } | null => {
     return null;
   }
 
+  const dimensions = parts[parts.length - 2];
+  if (!/^\d+x\d+$/.test(dimensions)) {
+    return null;
+  }
+
   const ext = parts[parts.length - 1];
-  const id = parts.slice(1, -1).join("-");
+  const id = parts.slice(1, -2).join("-");
+
+  if (!id || !/^[a-z0-9]+$/i.test(ext)) {
+    return null;
+  }
+
   return { id, ext };
 };
 

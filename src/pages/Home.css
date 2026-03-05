@@ -64,8 +64,11 @@ body,
 
 .navbar,
 .hero,
+.highlights,
 .process,
 .featured,
+.testimonials,
+.newsletter,
 .cta,
 .footer {
   position: relative;
@@ -339,19 +342,33 @@ body,
   transform: scale(1.06);
 }
 
+.highlights,
 .process,
 .featured,
+.testimonials,
+.newsletter,
 .cta,
 .footer {
   width: min(1240px, 100% - 48px);
   margin: 0 auto;
 }
 
+.highlights,
 .process,
-.featured {
+.featured,
+.testimonials {
   padding: 72px 0;
 }
 
+.section-headline {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.section-headline h2,
 .process h2,
 .featured h2 {
   margin: 0;
@@ -361,23 +378,26 @@ body,
   color: var(--brand-deep);
 }
 
-.process h3,
-.featured h3,
-.cta h2 {
-  margin: 10px 0 0;
-  font-size: clamp(1.8rem, 3vw, 2.5rem);
+.section-headline p {
+  margin: 0;
+  color: var(--muted);
+  max-width: 58ch;
 }
 
+.highlight-grid,
 .process-grid,
-.pizza-grid {
+.pizza-grid,
+.testimonial-grid {
   margin-top: 30px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 22px;
 }
 
+.highlight-card,
 .process-card,
-.pizza-card {
+.pizza-card,
+.testimonial-card {
   background: rgba(255, 255, 255, 0.84);
   border: 1px solid rgba(141, 82, 49, 0.16);
   border-radius: 18px;
@@ -385,24 +405,39 @@ body,
   transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
 }
 
-.process-card {
+.highlight-card,
+.process-card,
+.testimonial-card {
   padding: 24px;
 }
 
+.highlight-card h3,
 .process-card h4,
 .pizza-info h4 {
   margin: 0;
   font-size: 1.2rem;
 }
 
-.process-card p {
+.highlight-card p,
+.process-card p,
+.testimonial-card .quote {
   margin: 10px 0 0;
   color: var(--muted);
   line-height: 1.6;
 }
 
+.process h3,
+.featured h3,
+.cta h2,
+.newsletter h2 {
+  margin: 10px 0 0;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+}
+
+.highlight-card:hover,
 .process-card:hover,
-.pizza-card:hover {
+.pizza-card:hover,
+.testimonial-card:hover {
   transform: translateY(-7px);
   box-shadow: var(--shadow-strong);
   border-color: rgba(217, 73, 27, 0.35);
@@ -445,6 +480,75 @@ body,
 .pizza-info button:hover {
   transform: translateY(-2px);
   box-shadow: 0 14px 24px rgba(210, 74, 27, 0.33);
+}
+
+.testimonial-card .quote {
+  font-style: italic;
+}
+
+.testimonial-card .author {
+  margin: 16px 0 2px;
+  font-weight: 700;
+  color: #3f281b;
+}
+
+.testimonial-card .role {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.newsletter {
+  margin-top: 8px;
+  margin-bottom: 24px;
+  padding: 36px;
+  border-radius: 22px;
+  background: linear-gradient(125deg, rgba(255, 248, 240, 0.94) 0%, rgba(255, 237, 222, 0.94) 100%);
+  border: 1px solid rgba(147, 85, 53, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 28px;
+}
+
+.newsletter p {
+  margin: 12px 0 0;
+  color: var(--muted);
+  max-width: 58ch;
+}
+
+.newsletter-form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 330px;
+}
+
+.newsletter-form input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(153, 90, 58, 0.32);
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+
+.newsletter-form input:focus {
+  outline: 2px solid rgba(217, 73, 27, 0.25);
+  border-color: var(--brand);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .cta {
@@ -546,9 +650,25 @@ body,
     max-width: 720px;
   }
 
+  .section-headline {
+    flex-direction: column;
+    align-items: start;
+  }
+
+  .highlight-grid,
   .process-grid,
-  .pizza-grid {
+  .pizza-grid,
+  .testimonial-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .newsletter {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .newsletter-form {
+    min-width: 100%;
   }
 
   .footer {
@@ -561,8 +681,11 @@ body,
 @media (max-width: 720px) {
   .nav-inner,
   .hero,
+  .highlights,
   .process,
   .featured,
+  .testimonials,
+  .newsletter,
   .cta,
   .footer {
     width: min(1240px, 100% - 28px);
@@ -595,9 +718,21 @@ body,
     height: 360px;
   }
 
+  .highlight-grid,
   .process-grid,
-  .pizza-grid {
+  .pizza-grid,
+  .testimonial-grid {
     grid-template-columns: 1fr;
+  }
+
+  .newsletter {
+    padding: 26px 18px;
+    border-radius: 18px;
+  }
+
+  .newsletter-form {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .cta {
