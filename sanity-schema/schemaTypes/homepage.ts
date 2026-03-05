@@ -95,11 +95,13 @@ export default defineType({
       title: "heroTitle",
       media: "heroImage",
     },
-    prepare(selection: { title?: string; media?: unknown }) {
-      return {
-        title: selection.title || "Homepage",
-        media: selection.media,
-      };
-    },
+prepare(selection) {
+  const { title, media } = selection
+
+  return {
+    title: title || "Homepage",
+    media,
+  }
+}
   },
 });
