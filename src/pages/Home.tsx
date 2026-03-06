@@ -1,4 +1,5 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import "./Home.css";
 import { HOME_PAGE_QUERY } from "../lib/queries";
@@ -87,6 +88,11 @@ function Home() {
     return { before, highlight: heroHighlight, after };
   })();
 
+  const heroReveal = {
+    hidden: { opacity: 0, y: 28 },
+    show: { opacity: 1, y: 0 },
+  };
+
   return (
     <div className="home-container">
       <div className="bg-orb orb-one" />
@@ -120,23 +126,38 @@ function Home() {
             <Link to="/contact">Contact Us</Link>
           </nav>
 
-          <div className="nav-actions">
-            <Link to="/restaurant" className="primary-btn">
-              Order Now
-            </Link>
-            <div className="profile-icon" aria-label="profile">
-              <svg viewBox="0 0 24 24" role="img">
-                <path d="M12 12a4.5 4.5 0 100-9 4.5 4.5 0 000 9z" fill="#9a3d1f" />
-                <path d="M4 21a8 8 0 0116 0" fill="none" stroke="#9a3d1f" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </div>
-          </div>
+          <motion.div
+            className="nav-actions"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: "easeOut" }}
+          >
+            <motion.div whileHover={{ y: -2, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link to="/restaurant" className="primary-btn">
+                Order Now
+              </Link>
+            </motion.div>
+            <motion.div whileHover={{ y: -2, scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+              <div className="profile-icon" aria-label="profile">
+                <svg viewBox="0 0 24 24" role="img">
+                  <path d="M12 12a4.5 4.5 0 100-9 4.5 4.5 0 000 9z" fill="#9a3d1f" />
+                  <path d="M4 21a8 8 0 0116 0" fill="none" stroke="#9a3d1f" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </div>
+            </motion.div>
+          </motion.div>
         </div>
       </header>
 
-      <section className="hero" id="story">
-        <div className="hero-left">
-          <div className="badge">
+      <motion.section
+        className="hero"
+        id="story"
+        initial="hidden"
+        animate="show"
+        transition={{ staggerChildren: 0.12, delayChildren: 0.1 }}
+      >
+        <motion.div className="hero-left" variants={heroReveal} transition={{ duration: 0.6, ease: "easeOut" }}>
+          <motion.div className="badge" variants={heroReveal} transition={{ duration: 0.45, ease: "easeOut" }}>
             <svg viewBox="0 0 24 24" role="img">
               <path
                 d="M13 2c.8 2.2-.4 3.9-1.8 5.4-1.2 1.3-2.5 2.8-2.2 4.8.3 1.8 1.7 2.8 3.3 2.8 2 0 3.7-1.6 3.7-3.8 0-1.7-.9-3.4-2-5.1.1 2.5-1.1 3.5-2.3 4.4.4-2.7-.8-4.6-3-6.5C7.8 5.7 6 8.4 6 11.5 6 16 8.9 20 13 20s7-3.8 7-8.4C20 7.3 17.5 4 13 2z"
@@ -144,32 +165,43 @@ function Home() {
               />
             </svg>
             Watch Our Pizza Craft
-          </div>
+          </motion.div>
 
-          <h1>
+          <motion.h1 variants={heroReveal} transition={{ duration: 0.6, ease: "easeOut" }}>
             {heroHeadingParts.before}
             {heroHeadingParts.highlight ? <span>{heroHeadingParts.highlight}</span> : null}
             {heroHeadingParts.after}
-          </h1>
+          </motion.h1>
 
-          <p>{heroDescription}</p>
+          <motion.p variants={heroReveal} transition={{ duration: 0.6, ease: "easeOut" }}>
+            {heroDescription}
+          </motion.p>
 
-          <div className="hero-buttons">
-            <button className="primary-btn large">View Menu</button>
-            <button className="secondary-btn large">Find a Location</button>
-          </div>
+          <motion.div className="hero-buttons" variants={heroReveal} transition={{ duration: 0.55, ease: "easeOut" }}>
+            <motion.button className="primary-btn large" whileHover={{ y: -3, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              Reservation
+            </motion.button>
+            <motion.button className="secondary-btn large" whileHover={{ y: -3, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              View Menu
+            </motion.button>
+          </motion.div>
 
-          <div className="hero-stats">
+          <motion.div className="hero-stats" variants={heroReveal} transition={{ duration: 0.6, ease: "easeOut" }}>
             {statItems.map((item) => (
               <div className="stat-card" key={`${item.value}-${item.label}`}>
                 <h3>{item.value}</h3>
                 <p>{item.label}</p>
               </div>
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
-        <div className="hero-image">
+        <motion.div
+          className="hero-image"
+          variants={heroReveal}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          whileHover={{ scale: 1.01 }}
+        >
           <video
             className="hero-media"
             src={heroVideoSrc}
@@ -182,8 +214,8 @@ function Home() {
             poster="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1600&q=80"
             aria-label="Pizza making process"
           />
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
 
       <section className="highlights" aria-label="signature highlights">
         <div className="section-headline">
@@ -286,11 +318,10 @@ function Home() {
           <p>Traditional craft. Modern Italian energy.</p>
         </div>
 
-        <p>© 2026 allora. All rights reserved.</p>
+        <p>� 2026 allora. All rights reserved.</p>
       </footer>
     </div>
   );
 }
 
 export default Home;
-
