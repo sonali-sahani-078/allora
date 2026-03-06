@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+ï»¿import { useEffect, useState, type CSSProperties } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import "./Home.css";
@@ -48,8 +48,48 @@ const testimonials = [
   },
 ];
 
+const experiencePillars = [
+  {
+    title: "Chef Counter Nights",
+    description: "A 6-seat tasting experience where every course is finished in front of you.",
+    meta: "Tue and Thu",
+  },
+  {
+    title: "Seasonal Pairings",
+    description: "Curated cocktails and natural wines matched to the weekly oven menu.",
+    meta: "Updated weekly",
+  },
+  {
+    title: "After-Hours Dough Lab",
+    description: "Late-evening workshop on fermentation, hydration, and shaping technique.",
+    meta: "Limited seats",
+  },
+];
+
+const atmosphereNotes = ["Warm stone", "Live flame", "Vinyl jazz", "Open pass", "Handmade ceramics"];
+
+const editorialMoments = [
+  {
+    title: "Midnight Dough Session",
+    description: "Hydration, folds, and patience. The dough room runs long after service.",
+  },
+  {
+    title: "Char & Balance",
+    description: "A controlled blister on the crust with a soft interior is the benchmark.",
+  },
+  {
+    title: "Plating Ritual",
+    description: "Every pie is finished with oil, herb lift, and final heat before the pass.",
+  },
+  {
+    title: "Table Atmosphere",
+    description: "Warm light, handmade ceramics, and a soundtrack tuned to the room.",
+  },
+];
+
 function Home() {
   const [data, setData] = useState<HomePageData | null>(null);
+  const [heroGlow, setHeroGlow] = useState({ x: 72, y: 32 });
 
   useEffect(() => {
     if (!hasSanityConfig) {
@@ -88,9 +128,14 @@ function Home() {
     return { before, highlight: heroHighlight, after };
   })();
 
-  const heroReveal = {
-    hidden: { opacity: 0, y: 28 },
+  const revealUp = {
+    hidden: { opacity: 0, y: 26 },
     show: { opacity: 1, y: 0 },
+  };
+
+  const maskedReveal = {
+    hidden: { opacity: 0, clipPath: "inset(0 0 100% 0 round 18px)" },
+    show: { opacity: 1, clipPath: "inset(0 0 0% 0 round 18px)" },
   };
 
   return (
@@ -98,9 +143,14 @@ function Home() {
       <div className="bg-orb orb-one" />
       <div className="bg-orb orb-two" />
 
-      <header className="navbar">
+      <motion.header
+        className="navbar"
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
         <div className="nav-inner">
-          <div className="logo">
+          <motion.div className="logo" whileHover={{ scale: 1.03 }}>
             <span className="icon" aria-hidden="true">
               <svg viewBox="0 0 48 48" role="img">
                 <defs>
@@ -116,23 +166,18 @@ function Home() {
               </svg>
             </span>
             <h2>allora</h2>
-          </div>
+          </motion.div>
 
           <nav className="nav-links">
             <a href="#menu">Menu</a>
             <a href="#story">Our Story</a>
-            <a href="#locations">Locations</a>
+            <a href="#experience">Experience</a>
             <a href="#testimonials">Reviews</a>
             <Link to="/contact">Contact Us</Link>
           </nav>
 
-          <motion.div
-            className="nav-actions"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, ease: "easeOut" }}
-          >
-            <motion.div whileHover={{ y: -2, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <motion.div className="nav-actions" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+            <motion.div whileHover={{ y: -2, scale: 1.03 }} whileTap={{ scale: 0.98 }}>
               <Link to="/restaurant" className="primary-btn">
                 Order Now
               </Link>
@@ -147,37 +192,35 @@ function Home() {
             </motion.div>
           </motion.div>
         </div>
-      </header>
+      </motion.header>
 
       <motion.section
         className="hero"
         id="story"
         initial="hidden"
         animate="show"
-        transition={{ staggerChildren: 0.12, delayChildren: 0.1 }}
+        transition={{ staggerChildren: 0.1, delayChildren: 0.1 }}
       >
-        <motion.div className="hero-left" variants={heroReveal} transition={{ duration: 0.6, ease: "easeOut" }}>
-          <motion.div className="badge" variants={heroReveal} transition={{ duration: 0.45, ease: "easeOut" }}>
+        <motion.div className="hero-left" variants={revealUp}>
+          <motion.div className="badge" variants={revealUp}>
             <svg viewBox="0 0 24 24" role="img">
               <path
                 d="M13 2c.8 2.2-.4 3.9-1.8 5.4-1.2 1.3-2.5 2.8-2.2 4.8.3 1.8 1.7 2.8 3.3 2.8 2 0 3.7-1.6 3.7-3.8 0-1.7-.9-3.4-2-5.1.1 2.5-1.1 3.5-2.3 4.4.4-2.7-.8-4.6-3-6.5C7.8 5.7 6 8.4 6 11.5 6 16 8.9 20 13 20s7-3.8 7-8.4C20 7.3 17.5 4 13 2z"
                 fill="#b03518"
               />
             </svg>
-            Watch Our Pizza Craft
+            Signature Fire, Modern Craft
           </motion.div>
 
-          <motion.h1 variants={heroReveal} transition={{ duration: 0.6, ease: "easeOut" }}>
+          <motion.h1 variants={revealUp}>
             {heroHeadingParts.before}
             {heroHeadingParts.highlight ? <span>{heroHeadingParts.highlight}</span> : null}
             {heroHeadingParts.after}
           </motion.h1>
 
-          <motion.p variants={heroReveal} transition={{ duration: 0.6, ease: "easeOut" }}>
-            {heroDescription}
-          </motion.p>
+          <motion.p variants={revealUp}>{heroDescription}</motion.p>
 
-          <motion.div className="hero-buttons" variants={heroReveal} transition={{ duration: 0.55, ease: "easeOut" }}>
+          <motion.div className="hero-buttons" variants={revealUp}>
             <motion.button className="primary-btn large" whileHover={{ y: -3, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               Reservation
             </motion.button>
@@ -186,21 +229,32 @@ function Home() {
             </motion.button>
           </motion.div>
 
-          <motion.div className="hero-stats" variants={heroReveal} transition={{ duration: 0.6, ease: "easeOut" }}>
+          <motion.div className="hero-stats" variants={revealUp}>
             {statItems.map((item) => (
-              <div className="stat-card" key={`${item.value}-${item.label}`}>
+              <motion.div className="stat-card" key={`${item.value}-${item.label}`} whileHover={{ y: -6 }}>
                 <h3>{item.value}</h3>
                 <p>{item.label}</p>
-              </div>
+              </motion.div>
             ))}
           </motion.div>
         </motion.div>
 
         <motion.div
           className="hero-image"
-          variants={heroReveal}
-          transition={{ duration: 0.7, ease: "easeOut" }}
+          variants={revealUp}
           whileHover={{ scale: 1.01 }}
+          style={
+            {
+              "--spot-x": `${heroGlow.x}%`,
+              "--spot-y": `${heroGlow.y}%`,
+            } as CSSProperties
+          }
+          onMouseMove={(event) => {
+            const rect = event.currentTarget.getBoundingClientRect();
+            const x = ((event.clientX - rect.left) / rect.width) * 100;
+            const y = ((event.clientY - rect.top) / rect.height) * 100;
+            setHeroGlow({ x: Number(x.toFixed(2)), y: Number(y.toFixed(2)) });
+          }}
         >
           <video
             className="hero-media"
@@ -214,41 +268,94 @@ function Home() {
             poster="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1600&q=80"
             aria-label="Pizza making process"
           />
+          <div className="hero-media-tag">Chef Cam Live</div>
         </motion.div>
       </motion.section>
 
-      <section className="highlights" aria-label="signature highlights">
-        <div className="section-headline">
-          <h2>Crafted With Intention</h2>
-          <p>Every component is designed for flavor, balance, and a memorable table experience.</p>
-        </div>
-        <div className="highlight-grid">
-          {signatureHighlights.map((item) => (
-            <article className="highlight-card" key={item.title}>
-              <h3>{item.title}</h3>
-              <p>{item.description}</p>
-            </article>
+      <section className="atmosphere-band" aria-label="ambience notes">
+        <div className="atmosphere-track">
+          {[...atmosphereNotes, ...atmosphereNotes].map((note, index) => (
+            <span key={`${note}-${index}`}>{note}</span>
           ))}
         </div>
       </section>
 
-      <section className="process" id="reviews">
-        <h2>The allora Method</h2>
-        <h3>How We Craft Your Pizza</h3>
+      <motion.section
+        className="highlights"
+        aria-label="signature highlights"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.25 }}
+        transition={{ staggerChildren: 0.12 }}
+      >
+        <motion.div className="section-headline" variants={revealUp}>
+          <h2>Crafted With Intention</h2>
+          <p>Every component is designed for flavor, balance, and a memorable table experience.</p>
+        </motion.div>
+        <div className="highlight-grid">
+          {signatureHighlights.map((item) => (
+            <motion.article className="highlight-card" key={item.title} variants={revealUp} whileHover={{ y: -8 }}>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+            </motion.article>
+          ))}
+        </div>
+      </motion.section>
+
+      <motion.section
+        className="experience"
+        id="experience"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ staggerChildren: 0.12 }}
+      >
+        <motion.div className="section-headline" variants={revealUp}>
+          <h2>Beyond The Table</h2>
+          <p>Immersive moments designed for guests who care about craft, ritual, and atmosphere.</p>
+        </motion.div>
+        <div className="experience-grid">
+          {experiencePillars.map((pillar) => (
+            <motion.article className="experience-card" key={pillar.title} variants={revealUp} whileHover={{ y: -10 }}>
+              <p className="eyebrow">{pillar.meta}</p>
+              <h3>{pillar.title}</h3>
+              <p>{pillar.description}</p>
+            </motion.article>
+          ))}
+        </div>
+      </motion.section>
+
+      <motion.section
+        className="process"
+        id="reviews"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ staggerChildren: 0.1 }}
+      >
+        <motion.h2 variants={revealUp}>The allora Method</motion.h2>
+        <motion.h3 variants={revealUp}>How We Craft Your Pizza</motion.h3>
 
         <div className="process-grid">
           {processItems.map((item) => (
-            <div className="process-card" key={`${item.title}-${item.description}`}>
+            <motion.div className="process-card" key={`${item.title}-${item.description}`} variants={revealUp} whileHover={{ y: -8 }}>
               <h4>{item.title}</h4>
               <p>{item.description}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
-      </section>
+      </motion.section>
 
-      <section className="featured" id="menu">
-        <h2>Popular Choice</h2>
-        <h3>Featured Pizza</h3>
+      <motion.section
+        className="featured"
+        id="menu"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ staggerChildren: 0.1 }}
+      >
+        <motion.h2 variants={revealUp}>Popular Choice</motion.h2>
+        <motion.h3 variants={revealUp}>Featured Pizza</motion.h3>
 
         <div className="pizza-grid">
           {featuredPizzas.map((pizza, index) => {
@@ -257,34 +364,113 @@ function Home() {
               fallbackRemoteImages[index % fallbackRemoteImages.length];
 
             return (
-              <article className="pizza-card" key={`${pizza.name}-${pizza.price}-${index}`}>
+              <motion.article
+                className="pizza-card"
+                key={`${pizza.name}-${pizza.price}-${index}`}
+                variants={maskedReveal}
+                whileHover={{ y: -10, rotate: index % 2 === 0 ? -0.4 : 0.4 }}
+                transition={{ duration: 0.62, ease: "easeOut" }}
+              >
                 <img src={imageUrl} alt={pizza.image?.alt ?? `${pizza.name} pizza`} />
                 <div className="pizza-info">
                   <h4>{pizza.name}</h4>
                   <span>{pizza.price}</span>
                   <button>Add to Order</button>
                 </div>
-              </article>
+              </motion.article>
             );
           })}
         </div>
-      </section>
+      </motion.section>
 
-      <section className="testimonials" id="testimonials" aria-label="guest reviews">
-        <div className="section-headline">
+      <motion.section
+        className="chef-note"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.25 }}
+        transition={{ staggerChildren: 0.12 }}
+      >
+        <motion.div className="chef-copy" variants={revealUp}>
+          <h2>From The Chef</h2>
+          <p>
+            "Our idea is simple: start with deep fermentation, keep ingredients honest, and finish each pizza with
+            precision that respects both tradition and modern flavor."
+          </p>
+          <p className="chef-sign">Chef Matteo R.</p>
+        </motion.div>
+        <motion.div className="chef-metrics" variants={revealUp}>
+          <div>
+            <h4>14+</h4>
+            <p>Years of dough research</p>
+          </div>
+          <div>
+            <h4>9</h4>
+            <p>Regional flour blends tested yearly</p>
+          </div>
+          <div>
+            <h4>1000F</h4>
+            <p>Peak oven stone temperature</p>
+          </div>
+        </motion.div>
+      </motion.section>
+
+      <motion.section
+        className="editorial"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.25 }}
+        transition={{ staggerChildren: 0.1 }}
+      >
+        <motion.div className="section-headline" variants={revealUp}>
+          <h2>Editorial Notes</h2>
+          <p>Inside the studio where technique meets mood, timing, and relentless detail.</p>
+        </motion.div>
+        <div className="editorial-grid">
+          {editorialMoments.map((moment, index) => (
+            <motion.article
+              className="editorial-card"
+              key={moment.title}
+              variants={maskedReveal}
+              whileHover={{ y: -10 }}
+              transition={{ duration: 0.62, ease: "easeOut", delay: index * 0.04 }}
+            >
+              <p className="editorial-index">{String(index + 1).padStart(2, "0")}</p>
+              <h3>{moment.title}</h3>
+              <p>{moment.description}</p>
+            </motion.article>
+          ))}
+        </div>
+      </motion.section>
+
+      <motion.section
+        className="testimonials"
+        id="testimonials"
+        aria-label="guest reviews"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.25 }}
+        transition={{ staggerChildren: 0.1 }}
+      >
+        <motion.div className="section-headline" variants={revealUp}>
           <h2>What Guests Say</h2>
           <p>Real words from people who keep coming back for the atmosphere and the flavor.</p>
-        </div>
+        </motion.div>
         <div className="testimonial-grid">
-          {testimonials.map((item) => (
-            <article className="testimonial-card" key={item.name}>
+          {testimonials.map((item, index) => (
+            <motion.article
+              className="testimonial-card"
+              key={item.name}
+              variants={maskedReveal}
+              whileHover={{ y: -10, rotate: index % 2 === 0 ? -0.6 : 0.6 }}
+              transition={{ duration: 0.62, ease: "easeOut" }}
+            >
               <p className="quote">"{item.quote}"</p>
               <p className="author">{item.name}</p>
               <p className="role">{item.role}</p>
-            </article>
+            </motion.article>
           ))}
         </div>
-      </section>
+      </motion.section>
 
       <section className="newsletter" aria-label="newsletter signup">
         <div>
@@ -318,7 +504,7 @@ function Home() {
           <p>Traditional craft. Modern Italian energy.</p>
         </div>
 
-        <p>© 2026 allora. All rights reserved.</p>
+        <p>(c) 2026 allora. All rights reserved.</p>
       </footer>
     </div>
   );
