@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import "./Restaurant.css";
 import { RESTAURANT_PAGE_QUERY } from "../lib/queries";
@@ -143,6 +143,7 @@ function Restaurant() {
   const [spice, setSpice] = useState<SpiceFilter>("all");
   const [swipeProgress, setSwipeProgress] = useState(0);
   const [orderMessage, setOrderMessage] = useState("");
+  const [orderOtp, setOrderOtp] = useState<string | null>(null);
   const [reservationDate, setReservationDate] = useState(todayLocalDate);
   const [reservationTime, setReservationTime] = useState("");
   const [guestCount, setGuestCount] = useState(2);
@@ -263,20 +264,27 @@ function Restaurant() {
   };
 
   const itemCount = cartItems.reduce((sum, item) => sum + item.qty, 0);
-  const total = cartItems.reduce((sum, item) => sum + item.qty * item.price, 0);
+  const subtotal = cartItems.reduce((sum, item) => sum + item.qty * item.price, 0);
+  const deliveryFee = subtotal >= 40 ? 0 : 3.99;
+  const taxesAndFees = subtotal * 0.08;
+  const total = subtotal + deliveryFee + taxesAndFees;
 
   const placeOrder = () => {
     if (!cartItems.length) {
       return;
     }
 
+    const otp = `${Math.floor(100000 + Math.random() * 900000)}`;
     setCartItems([]);
     setSwipeProgress(0);
+    setOrderOtp(otp);
     setOrderMessage("Order placed successfully. Your kitchen ticket is now live.");
   };
 
   const handleSwipeChange = (value: number) => {
     setSwipeProgress(value);
+    setOrderMessage("");
+    setOrderOtp(null);
 
     if (value >= 96) {
       placeOrder();
@@ -376,7 +384,20 @@ function Restaurant() {
       <header className="ac-header">
         <div className="ac-brand-wrap">
           <div className="ac-brand">
-            <span className="ac-brand-icon">a</span>
+            <span className="ac-brand-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48" role="img">
+                <defs>
+                  <linearGradient id="pizzaGradHeader" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#f7c66b" />
+                    <stop offset="100%" stopColor="#de8b33" />
+                  </linearGradient>
+                </defs>
+                <path d="M6 10h36L24 42z" fill="url(#pizzaGradHeader)" stroke="#b76019" strokeWidth="2" />
+                <circle cx="19" cy="22" r="2.5" fill="#c53d22" />
+                <circle cx="27" cy="18" r="2.5" fill="#c53d22" />
+                <circle cx="25" cy="27" r="2.5" fill="#8f9a32" />
+              </svg>
+            </span>
             <h2>allora</h2>
           </div>
           <nav className="ac-nav">
@@ -659,64 +680,114 @@ function Restaurant() {
 
       <aside className={`ac-cart-panel ${isCartOpen ? "is-open" : ""}`} aria-label="Shopping cart">
         <div className="ac-cart-header">
-          <h3>Your Cart</h3>
+          <div>
+            <h3>Your Cart</h3>
+            <p>{itemCount ? `${itemCount} item${itemCount > 1 ? "s" : ""} selected` : "Add dishes to begin"}</p>
+          </div>
           <button type="button" onClick={() => setIsCartOpen(false)}>
             Close
           </button>
         </div>
 
         {cartItems.length === 0 ? (
-          <p className="ac-cart-empty">Your cart is empty.</p>
+          <div className="ac-cart-empty">
+            <h4>Your cart is empty</h4>
+            <p>Add a pizza or side to see pricing, delivery, and checkout details.</p>
+          </div>
         ) : (
           <>
+            <div className="ac-delivery-pill">Delivery in 25-35 min</div>
             <div className="ac-cart-list">
               {cartItems.map((item) => (
                 <div key={item.id} className="ac-cart-item">
-                  <div>
-                    <h4>{item.name}</h4>
-                    <p>${item.price.toFixed(2)}</p>
+                  <div className="ac-cart-item-main">
+                    <div>
+                      <h4>{item.name}</h4>
+                      <p>${item.price.toFixed(2)} each</p>
+                    </div>
+                    <strong>${(item.price * item.qty).toFixed(2)}</strong>
                   </div>
-                  <div className="ac-qty-controls">
-                    <button type="button" onClick={() => updateQuantity(item.id, -1)}>
-                      -
-                    </button>
-                    <span>{item.qty}</span>
-                    <button type="button" onClick={() => updateQuantity(item.id, 1)}>
-                      +
+                  <div className="ac-cart-item-actions">
+                    <div className="ac-qty-controls">
+                      <button type="button" onClick={() => updateQuantity(item.id, -1)}>
+                        -
+                      </button>
+                      <span>{item.qty}</span>
+                      <button type="button" onClick={() => updateQuantity(item.id, 1)}>
+                        +
+                      </button>
+                    </div>
+                    <button type="button" className="ac-remove" onClick={() => removeItem(item.id)}>
+                      Remove
                     </button>
                   </div>
-                  <button type="button" className="ac-remove" onClick={() => removeItem(item.id)}>
-                    Remove
-                  </button>
                 </div>
               ))}
             </div>
             <div className="ac-cart-footer">
-              <p>Total</p>
-              <strong>${total.toFixed(2)}</strong>
+              <div className="ac-summary-row">
+                <p>Subtotal</p>
+                <strong>${subtotal.toFixed(2)}</strong>
+              </div>
+              <div className="ac-summary-row">
+                <p>Delivery Fee</p>
+                <strong>{deliveryFee === 0 ? "FREE" : `$${deliveryFee.toFixed(2)}`}</strong>
+              </div>
+              <div className="ac-summary-row">
+                <p>Taxes & Fees</p>
+                <strong>${taxesAndFees.toFixed(2)}</strong>
+              </div>
+              <div className="ac-summary-row ac-summary-total">
+                <p>Total</p>
+                <strong>${total.toFixed(2)}</strong>
+              </div>
             </div>
+            <button type="button" className="ac-checkout-btn" onClick={placeOrder}>
+              Proceed to Checkout
+            </button>
+            <p className="ac-checkout-note">Secure checkout. You can review your order before final payment.</p>
             <div className="ac-swipe-wrap">
-              <p>Swipe to place order</p>
+              <p>Quick order slider</p>
               <input
+                className="ac-swipe-input"
                 type="range"
                 min={0}
                 max={100}
                 value={swipeProgress}
                 onChange={(event) => handleSwipeChange(Number(event.target.value))}
                 aria-label="Swipe to place order"
+                style={{ "--swipe-progress": `${swipeProgress}%` } as CSSProperties}
               />
             </div>
           </>
         )}
 
-        {orderMessage ? <p className="ac-order-msg">{orderMessage}</p> : null}
+        {orderMessage ? (
+          <div className="ac-order-msg">
+            <p>{orderMessage}</p>
+            {orderOtp ? <strong>Your pickup OTP: {orderOtp}</strong> : null}
+          </div>
+        ) : null}
       </aside>
 
       <footer className="ac-footer">
         <div className="ac-footer-grid">
           <div>
             <div className="ac-brand">
-              <span className="ac-brand-icon">a</span>
+              <span className="ac-brand-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48" role="img">
+                  <defs>
+                    <linearGradient id="pizzaGradFooter" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#f7c66b" />
+                      <stop offset="100%" stopColor="#de8b33" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M6 10h36L24 42z" fill="url(#pizzaGradFooter)" stroke="#b76019" strokeWidth="2" />
+                  <circle cx="19" cy="22" r="2.5" fill="#c53d22" />
+                  <circle cx="27" cy="18" r="2.5" fill="#c53d22" />
+                  <circle cx="25" cy="27" r="2.5" fill="#8f9a32" />
+                </svg>
+              </span>
               <h2>allora</h2>
             </div>
             <p>
@@ -737,10 +808,12 @@ function Restaurant() {
             <a href="#">Contact</a>
           </div>
         </div>
-        <p className="ac-copyright">© 2026 allora. All rights reserved.</p>
+        <p className="ac-copyright">� 2026 allora. All rights reserved.</p>
       </footer>
     </div>
   );
 }
 
 export default Restaurant;
+
+
