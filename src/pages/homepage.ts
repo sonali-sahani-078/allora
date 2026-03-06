@@ -3,8 +3,7 @@ import type { HomePageData } from "../lib/types";
 export const defaultHomePageContent: HomePageData = {
   heroTitle: "Fire-kissed Pizza with Modern Italian Soul",
   heroHighlight: "Pizza",
-  heroDescription:
-    "allora serves 48-hour fermented sourdough pizza crafted with premium, fresh ingredients and baked at 700°F for the perfect blistered finish.",
+  heroDescription: "",
   process: [
     {
       title: "48-Hour Fermentation",
@@ -15,7 +14,7 @@ export const defaultHomePageContent: HomePageData = {
       description: "San Marzano tomatoes, fresh mozzarella, basil, and cold-pressed olive oil.",
     },
     {
-      title: "700° Wood-Fire Bake",
+      title: "700Â° Wood-Fire Bake",
       description: "Flash-baked to balance smoky char, crunch, and tenderness.",
     },
   ],
@@ -82,4 +81,5 @@ export const mergeHomePageData = (data: HomePageData | null): HomePageData => {
       : defaultHomePageContent.featuredPizzas,
   };
 };
+
 
