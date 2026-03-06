@@ -772,3 +772,51 @@ body,
     transition: none !important;
   }
 }
+/* Premium polish overrides */
+.hero-image::before {
+  background:
+    radial-gradient(circle at var(--spot-x, 72%) var(--spot-y, 32%), rgba(255, 219, 154, 0.3), transparent 38%),
+    radial-gradient(circle at 78% 26%, rgba(255, 196, 106, 0.3), transparent 48%),
+    linear-gradient(165deg, rgba(0, 0, 0, 0.54) 0%, rgba(0, 0, 0, 0.1) 45%, rgba(0, 0, 0, 0.62) 100%);
+}
+
+.highlight-card,
+.process-card,
+.pizza-card,
+.testimonial-card,
+.experience-card,
+.editorial-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.highlight-card::after,
+.process-card::after,
+.pizza-card::after,
+.testimonial-card::after,
+.experience-card::after,
+.editorial-card::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  border: 1px solid transparent;
+  background: linear-gradient(130deg, rgba(255, 176, 122, 0.35), rgba(255, 255, 255, 0), rgba(255, 176, 122, 0.25)) border-box;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) padding-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.highlight-card:hover::after,
+.process-card:hover::after,
+.pizza-card:hover::after,
+.testimonial-card:hover::after,
+.experience-card:hover::after,
+.editorial-card:hover::after {
+  opacity: 1;
+}
