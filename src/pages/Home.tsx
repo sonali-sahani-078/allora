@@ -71,9 +71,7 @@ function Home() {
   const heroHighlight = content.heroHighlight ?? "";
   const heroDescription = content.heroDescription ?? "";
 
-  const heroImage =
-    buildSanityImageUrl(data?.heroImage?.asset?._ref, { width: 1200, height: 900 }) ??
-    "https://images.unsplash.com/photo-1601924638867-3ec2f0dbe0e6";
+  const heroVideoSrc = "/videos/12456197_2160_3840_25fps.mp4";
 
   const processItems: ProcessItem[] = content.process ?? defaultHomePageContent.process ?? [];
   const statItems: StatItem[] = content.stats ?? defaultHomePageContent.stats ?? [];
@@ -145,7 +143,7 @@ function Home() {
                 fill="#b03518"
               />
             </svg>
-            Voted #1 Wood-Fired Pizza
+            Watch Our Pizza Craft
           </div>
 
           <h1>
@@ -172,7 +170,18 @@ function Home() {
         </div>
 
         <div className="hero-image">
-          <img src={heroImage} alt={data?.heroImage?.alt ?? "Wood-fired pizza"} />
+          <video
+            className="hero-media"
+            src={heroVideoSrc}
+            title="Pizza making process"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            poster="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1600&q=80"
+            aria-label="Pizza making process"
+          />
         </div>
       </section>
 

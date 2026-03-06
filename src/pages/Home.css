@@ -330,15 +330,16 @@ body,
   z-index: 1;
 }
 
-.hero-image img {
+.hero-media {
   display: block;
   width: 100%;
   height: min(560px, 60vh);
+  border: 0;
   object-fit: cover;
   transition: transform 0.6s ease;
 }
 
-.hero-image:hover img {
+.hero-image:hover .hero-media {
   transform: scale(1.06);
 }
 
@@ -714,7 +715,7 @@ body,
     grid-template-columns: 1fr;
   }
 
-  .hero-image img {
+  .hero-media {
     height: 360px;
   }
 
