@@ -87,6 +87,27 @@ const editorialMoments = [
   },
 ];
 
+const serviceMoments = [
+  {
+    title: "Private Dining",
+    description: "Intimate chef-led dinners for celebrations, launches, and curated gatherings.",
+  },
+  {
+    title: "Seasonal Residencies",
+    description: "Collaborations with guest chefs and regional producers every quarter.",
+  },
+  {
+    title: "Tasting Pairings",
+    description: "Progressive pairing flights with natural wines and zero-proof signatures.",
+  },
+];
+
+const weeklyEvents = [
+  { day: "Tuesday", event: "Fermentation Masterclass", time: "7:30 PM" },
+  { day: "Thursday", event: "Chef Counter Experience", time: "8:00 PM" },
+  { day: "Saturday", event: "Live Fire Evenings", time: "9:00 PM" },
+];
+
 function Home() {
   const [data, setData] = useState<HomePageData | null>(null);
   const [heroGlow, setHeroGlow] = useState({ x: 72, y: 32 });
@@ -172,6 +193,7 @@ function Home() {
             <a href="#menu">Menu</a>
             <a href="#story">Our Story</a>
             <a href="#experience">Experience</a>
+            <a href="#studio-services">Studio</a>
             <a href="#testimonials">Reviews</a>
             <Link to="/contact">Contact Us</Link>
           </nav>
@@ -437,6 +459,43 @@ function Home() {
               <p className="editorial-index">{String(index + 1).padStart(2, "0")}</p>
               <h3>{moment.title}</h3>
               <p>{moment.description}</p>
+            </motion.article>
+          ))}
+        </div>
+      </motion.section>
+
+      <section className="service-lab" id="studio-services">
+        <div className="section-headline">
+          <h2>Studio Services</h2>
+          <p>Design-forward hospitality experiences crafted for guests who appreciate detail.</p>
+        </div>
+        <div className="service-grid">
+          {serviceMoments.map((item) => (
+            <article className="service-card" key={item.title}>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <motion.section
+        className="events"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.25 }}
+        transition={{ staggerChildren: 0.1 }}
+      >
+        <motion.div className="section-headline" variants={revealUp}>
+          <h2>Weekly Rituals</h2>
+          <p>Reserve a place at our most requested evenings.</p>
+        </motion.div>
+        <div className="events-list">
+          {weeklyEvents.map((item) => (
+            <motion.article className="event-item" key={`${item.day}-${item.event}`} variants={revealUp} whileHover={{ x: 4 }}>
+              <p className="event-day">{item.day}</p>
+              <h3>{item.event}</h3>
+              <p className="event-time">{item.time}</p>
             </motion.article>
           ))}
         </div>
