@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState, type CSSProperties } from "react";
-import { motion } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 import { Link } from "react-router-dom";
 import "./Home.css";
 import { HOME_PAGE_QUERY } from "../lib/queries";
@@ -111,6 +111,9 @@ const weeklyEvents = [
 function Home() {
   const [data, setData] = useState<HomePageData | null>(null);
   const [heroGlow, setHeroGlow] = useState({ x: 72, y: 32 });
+  const plateTopControls = useAnimation();
+  const plateMidControls = useAnimation();
+  const plateBottomControls = useAnimation();
 
   useEffect(() => {
     if (!hasSanityConfig) {
@@ -126,6 +129,24 @@ function Home() {
         setData(null);
       });
   }, []);
+
+  useEffect(() => {
+    void plateTopControls.start({
+      opacity: 1,
+      clipPath: "inset(0 0 0 0)",
+      transition: { duration: 0.9, ease: "easeOut" },
+    });
+    void plateMidControls.start({
+      opacity: 1,
+      clipPath: "inset(0 0 0 0)",
+      transition: { duration: 0.9, ease: "easeOut", delay: 0.12 },
+    });
+    void plateBottomControls.start({
+      opacity: 1,
+      clipPath: "inset(0 0 0 0)",
+      transition: { duration: 0.9, ease: "easeOut", delay: 0.24 },
+    });
+  }, [plateTopControls, plateMidControls, plateBottomControls]);
 
   const content = mergeHomePageData(data);
 
@@ -310,16 +331,33 @@ function Home() {
         viewport={{ once: true, amount: 0.25 }}
         transition={{ staggerChildren: 0.12 }}
       >
-        <motion.div className="section-headline" variants={revealUp}>
-          <h2>Crafted With Intention</h2>
-          <p>Every component is designed for flavor, balance, and a memorable table experience.</p>
-        </motion.div>
-        <div className="highlight-grid">
-          {signatureHighlights.map((item) => (
-            <motion.article className="highlight-card" key={item.title} variants={revealUp} whileHover={{ y: -8 }}>
+        <motion.h2 className="crafted-title" variants={revealUp}>
+          Crafted With Intention
+        </motion.h2>
+        <div className="highlight-grid recipe-layout">
+          <motion.div
+            className="recipe-plate recipe-plate-top"
+            aria-hidden="true"
+            initial={{ opacity: 0.6, clipPath: "inset(0 0 0 90%)" }}
+            animate={plateTopControls}
+          />
+          <motion.div
+            className="recipe-plate recipe-plate-mid"
+            aria-hidden="true"
+            initial={{ opacity: 0.6, clipPath: "inset(0 90% 0 0)" }}
+            animate={plateMidControls}
+          />
+          <motion.div
+            className="recipe-plate recipe-plate-bottom"
+            aria-hidden="true"
+            initial={{ opacity: 0.6, clipPath: "inset(0 0 0 90%)" }}
+            animate={plateBottomControls}
+          />
+          {signatureHighlights.map((item, index) => (
+            <article className={`highlight-card recipe-note recipe-note-${index + 1}`} key={item.title}>
               <h3>{item.title}</h3>
               <p>{item.description}</p>
-            </motion.article>
+            </article>
           ))}
         </div>
       </motion.section>
@@ -570,3 +608,4 @@ function Home() {
 }
 
 export default Home;
+
