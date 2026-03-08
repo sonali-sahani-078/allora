@@ -1199,6 +1199,8 @@ body,
   position: absolute;
   border-radius: 999px;
   z-index: 1;
+  will-change: transform, opacity;
+  transform-origin: center;
   box-shadow:
     inset 0 0 0 2px rgba(153, 107, 72, 0.2),
     0 12px 30px rgba(63, 38, 22, 0.12);

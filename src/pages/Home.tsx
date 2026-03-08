@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState, type CSSProperties } from "react";
-import { motion, useAnimation } from "framer-motion";
+import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import "./Home.css";
 import { HOME_PAGE_QUERY } from "../lib/queries";
@@ -111,9 +111,6 @@ const weeklyEvents = [
 function Home() {
   const [data, setData] = useState<HomePageData | null>(null);
   const [heroGlow, setHeroGlow] = useState({ x: 72, y: 32 });
-  const plateTopControls = useAnimation();
-  const plateMidControls = useAnimation();
-  const plateBottomControls = useAnimation();
 
   useEffect(() => {
     if (!hasSanityConfig) {
@@ -129,24 +126,6 @@ function Home() {
         setData(null);
       });
   }, []);
-
-  useEffect(() => {
-    void plateTopControls.start({
-      opacity: 1,
-      clipPath: "inset(0 0 0 0)",
-      transition: { duration: 0.9, ease: "easeOut" },
-    });
-    void plateMidControls.start({
-      opacity: 1,
-      clipPath: "inset(0 0 0 0)",
-      transition: { duration: 0.9, ease: "easeOut", delay: 0.12 },
-    });
-    void plateBottomControls.start({
-      opacity: 1,
-      clipPath: "inset(0 0 0 0)",
-      transition: { duration: 0.9, ease: "easeOut", delay: 0.24 },
-    });
-  }, [plateTopControls, plateMidControls, plateBottomControls]);
 
   const content = mergeHomePageData(data);
 
@@ -338,20 +317,26 @@ function Home() {
           <motion.div
             className="recipe-plate recipe-plate-top"
             aria-hidden="true"
-            initial={{ opacity: 0.6, clipPath: "inset(0 0 0 90%)" }}
-            animate={plateTopControls}
+            initial={{ opacity: 0, x: 42, scale: 0.96 }}
+            whileInView={{ opacity: 1, x: 0, scale: 1 }}
+            viewport={{ once: true, amount: 0.45 }}
+            transition={{ duration: 0.9, ease: "easeOut" }}
           />
           <motion.div
             className="recipe-plate recipe-plate-mid"
             aria-hidden="true"
-            initial={{ opacity: 0.6, clipPath: "inset(0 90% 0 0)" }}
-            animate={plateMidControls}
+            initial={{ opacity: 0, x: -42, scale: 0.96 }}
+            whileInView={{ opacity: 1, x: 0, scale: 1 }}
+            viewport={{ once: true, amount: 0.45 }}
+            transition={{ duration: 0.9, ease: "easeOut", delay: 0.12 }}
           />
           <motion.div
             className="recipe-plate recipe-plate-bottom"
             aria-hidden="true"
-            initial={{ opacity: 0.6, clipPath: "inset(0 0 0 90%)" }}
-            animate={plateBottomControls}
+            initial={{ opacity: 0, x: 42, scale: 0.96 }}
+            whileInView={{ opacity: 1, x: 0, scale: 1 }}
+            viewport={{ once: true, amount: 0.45 }}
+            transition={{ duration: 0.9, ease: "easeOut", delay: 0.24 }}
           />
           {signatureHighlights.map((item, index) => (
             <article className={`highlight-card recipe-note recipe-note-${index + 1}`} key={item.title}>
