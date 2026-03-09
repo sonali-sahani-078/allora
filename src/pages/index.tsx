@@ -29,7 +29,6 @@ export default function Intro() {
     >
       <video
         className="intro-video"
-        poster="/images/open kitchen.jpg"
         autoPlay
         muted
         loop

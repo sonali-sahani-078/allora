@@ -66,8 +66,6 @@ const experiencePillars = [
   },
 ];
 
-const atmosphereNotes = ["Warm stone", "Live flame", "Vinyl jazz", "Open pass", "Handmade ceramics"];
-
 const editorialMoments = [
   {
     title: "Midnight Dough Session",
@@ -243,12 +241,16 @@ function Home() {
           <motion.p variants={revealUp}>{heroDescription}</motion.p>
 
           <motion.div className="hero-buttons" variants={revealUp}>
-            <motion.button className="primary-btn large" whileHover={{ y: -3, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              Reservation
-            </motion.button>
-            <motion.button className="secondary-btn large" whileHover={{ y: -3, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              View Menu
-            </motion.button>
+            <motion.div whileHover={{ y: -3, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link to="/restaurant" className="primary-btn large">
+                Reservation
+              </Link>
+            </motion.div>
+            <motion.div whileHover={{ y: -3, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link to="/restaurant" className="secondary-btn large">
+                View Menu
+              </Link>
+            </motion.div>
           </motion.div>
 
           <motion.div className="hero-stats" variants={revealUp}>
@@ -287,20 +289,11 @@ function Home() {
             muted
             playsInline
             preload="auto"
-            poster="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1600&q=80"
             aria-label="Pizza making process"
           />
           <div className="hero-media-tag">Chef Cam Live</div>
         </motion.div>
       </motion.section>
-
-      <section className="atmosphere-band" aria-label="ambience notes">
-        <div className="atmosphere-track">
-          {[...atmosphereNotes, ...atmosphereNotes].map((note, index) => (
-            <span key={`${note}-${index}`}>{note}</span>
-          ))}
-        </div>
-      </section>
 
       <motion.section
         className="highlights"
@@ -414,13 +407,14 @@ function Home() {
                 key={`${pizza.name}-${pizza.price}-${index}`}
                 variants={maskedReveal}
                 whileHover={{ y: -10, rotate: index % 2 === 0 ? -0.4 : 0.4 }}
-                transition={{ duration: 0.62, ease: "easeOut" }}
+                transition={{ duration: 0.68, ease: "easeOut", delay: index * 0.05 }}
               >
                 <img src={imageUrl} alt={pizza.image?.alt ?? `${pizza.name} pizza`} />
                 <div className="pizza-info">
+                  <p className="pizza-tag">Chef Feature</p>
                   <h4>{pizza.name}</h4>
                   <span>{pizza.price}</span>
-                  <button>Add to Order</button>
+                  <Link to="/restaurant">Add to Order</Link>
                 </div>
               </motion.article>
             );
@@ -564,9 +558,9 @@ function Home() {
             Email address
           </label>
           <input id="newsletter-email" type="email" placeholder="Enter your email" />
-          <button type="submit" className="primary-btn">
+          <Link to="/contact" className="primary-btn">
             Subscribe
-          </button>
+          </Link>
         </form>
       </section>
 
@@ -575,8 +569,12 @@ function Home() {
         <p>{content.ctaDescription}</p>
 
         <div className="cta-buttons">
-          <button className="primary-btn">Order Online</button>
-          <button className="secondary-btn">View Full Menu</button>
+          <Link to="/restaurant" className="primary-btn">
+            Order Online
+          </Link>
+          <Link to="/restaurant" className="secondary-btn">
+            View Full Menu
+          </Link>
         </div>
       </section>
 

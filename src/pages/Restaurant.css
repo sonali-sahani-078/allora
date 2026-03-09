@@ -1044,6 +1044,8 @@ body,
   .ac-header {
     flex-direction: column;
     align-items: stretch;
+    padding-left: 14px;
+    padding-right: 14px;
   }
 
   .ac-brand-wrap,
@@ -1055,12 +1057,26 @@ body,
   }
 
   .ac-nav {
-    display: none;
+    display: flex;
+    width: 100%;
+    overflow-x: auto;
+    gap: 6px;
+    padding-bottom: 2px;
+  }
+
+  .ac-nav a,
+  .ac-nav button {
+    white-space: nowrap;
   }
 
   .ac-header-actions input {
     width: 100%;
-    order: 3;
+    order: 1;
+  }
+
+  .ac-header-actions .ac-cart,
+  .ac-header-actions .ac-avatar {
+    order: 2;
   }
 
   .ac-grid,
@@ -1074,13 +1090,51 @@ body,
     grid-template-columns: 1fr;
   }
 
-  .ac-cart,
-  .ac-avatar {
-    order: 2;
-  }
-
   .ac-title-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .ac-main,
+  .ac-footer {
+    padding-left: 14px;
+    padding-right: 14px;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .ac-layout {
+    gap: 16px;
+  }
+
+  .ac-content {
+    order: 1;
+  }
+
+  .ac-sidebar {
+    order: 2;
+  }
+}
+
+@media (max-width: 480px) {
+  .ac-card-image {
+    height: 180px;
+  }
+
+  .ac-drinks article,
+  .ac-sides-grid article {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ac-drinks article button {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .ac-cart-panel {
+    width: 100vw;
+    max-width: 100vw;
+    border-left: 0;
   }
 }

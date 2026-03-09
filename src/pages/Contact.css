@@ -293,4 +293,32 @@ body,
     gap: 16px;
     flex-wrap: wrap;
   }
+
+  .nav-actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .nav-actions .primary-btn {
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .contact-card {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact-main {
+    padding-top: 38px;
+  }
+
+  .contact-hero p {
+    font-size: 0.95rem;
+  }
+
+  .contact-form .primary-btn {
+    width: 100%;
+  }
 }

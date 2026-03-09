@@ -125,7 +125,7 @@ function Contact() {
           </div>
 
           <nav className="nav-links">
-            <Link to="/">Home</Link>
+            <Link to="/home">Home</Link>
             <Link to="/restaurant">Menu</Link>
             <Link to="/contact">Contact Us</Link>
           </nav>

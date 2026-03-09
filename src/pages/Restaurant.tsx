@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
+﻿import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import "./Restaurant.css";
 import { RESTAURANT_PAGE_QUERY } from "../lib/queries";
@@ -404,7 +404,7 @@ function Restaurant() {
             <button type="button" onClick={() => setTab("signature")}>Menu</button>
             <button type="button" onClick={() => setIsCartOpen(true)}>Orders</button>
             <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>Profile</button>
-            <Link to="/">Home</Link>
+            <Link to="/home">Home</Link>
           </nav>
         </div>
 
@@ -808,12 +808,13 @@ function Restaurant() {
             <a href="#">Contact</a>
           </div>
         </div>
-        <p className="ac-copyright">� 2026 allora. All rights reserved.</p>
+        <p className="ac-copyright">© 2026 allora. All rights reserved.</p>
       </footer>
     </div>
   );
 }
 
 export default Restaurant;
+
 
 
