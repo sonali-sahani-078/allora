@@ -4,25 +4,8 @@ import "./Restaurant.css";
 import { RESTAURANT_PAGE_QUERY } from "../lib/queries";
 import { buildSanityImageUrl } from "../lib/sanityImage";
 import { hasSanityConfig, sanityClient } from "../lib/sanity";
-import type { RestaurantPageData, SignatureDish } from "../lib/types";
-import {
-  defaultRestaurantPageContent,
-  fallbackRestaurantImages,
-  mergeRestaurantPageData,
-} from "./restaurantPage";
-
-type SideItem = {
-  id: string;
-  name: string;
-  price: string;
-  image: string;
-};
-
-type DrinkItem = {
-  id: string;
-  name: string;
-  price: string;
-};
+import type { DrinkItem, RestaurantPageData, SideItem, SignatureDish } from "../lib/types";
+import { fallbackRestaurantImages, mergeRestaurantPageData } from "./restaurantPage";
 
 type CartItem = {
   id: string;
@@ -36,57 +19,9 @@ type DietaryFilter = "all" | "vegan" | "glutenFree" | "dairyFree";
 type SpiceFilter = "all" | "mild" | "spicy" | "extraHot";
 type ReservationStatus = { kind: "success" | "error"; message: string };
 
-const reservationSlots = [
-  "11:30",
-  "12:00",
-  "12:30",
-  "13:00",
-  "18:00",
-  "18:30",
-  "19:00",
-  "19:30",
-  "20:00",
-  "20:30",
-  "21:00",
-];
-
 const web3FormsEndpoint = "https://api.web3forms.com/submit";
 const web3FormsAccessKey =
   import.meta.env.VITE_WEB3FORMS_ACCESS_KEY ?? "b00e87dc-2490-4708-a404-c13e34c4d963";
-
-
-const sideItems: SideItem[] = [
-  {
-    id: "side-garlic-knots",
-    name: "Garlic Knots",
-    price: "$5.99",
-    image: "https://images.unsplash.com/photo-1619531038896-6d3b4be94c2d",
-  },
-  {
-    id: "side-caesar-salad",
-    name: "Caesar Salad",
-    price: "$7.50",
-    image: "https://images.unsplash.com/photo-1551248429-40975aa4de74",
-  },
-  {
-    id: "side-caprese-sticks",
-    name: "Caprese Sticks",
-    price: "$6.25",
-    image: "https://images.unsplash.com/photo-1608039829572-78524f79c4c7",
-  },
-  {
-    id: "side-wild-green-salad",
-    name: "Wild Green Salad",
-    price: "$7.00",
-    image: "https://images.unsplash.com/photo-1546793665-c74683f339c1",
-  },
-];
-
-const drinkItems: DrinkItem[] = [
-  { id: "drink-sparkling", name: "Sparkling Citrus Soda", price: "$4.50" },
-  { id: "drink-berry", name: "Berry Basil Cooler", price: "$5.25" },
-  { id: "drink-espresso", name: "Iced Espresso", price: "$4.75" },
-];
 
 const parsePrice = (value?: string): number => {
   if (!value) {
@@ -99,12 +34,12 @@ const parsePrice = (value?: string): number => {
 
 const todayLocalDate = () => new Date().toISOString().split("T")[0];
 
-const getFallbackSlots = (date: string, locallyBooked: Record<string, string[]>) => {
+const getFallbackSlots = (date: string, locallyBooked: Record<string, string[]>, slots: string[]) => {
   const now = new Date();
   const isToday = date === todayLocalDate();
   const booked = new Set(locallyBooked[date] ?? []);
 
-  return reservationSlots.filter((slot) => {
+  return slots.filter((slot) => {
     if (booked.has(slot)) {
       return false;
     }
@@ -170,21 +105,23 @@ function Restaurant() {
       });
   }, []);
 
+  const content = mergeRestaurantPageData(data);
+  const reservationSlots = useMemo(() => content.reservationSlots ?? [], [content.reservationSlots]);
+  const sideItems: SideItem[] = content.sideItems ?? [];
+  const drinkItems: DrinkItem[] = content.drinkItems ?? [];
+
   useEffect(() => {
-    const fallback = getFallbackSlots(reservationDate, locallyBookedSlots);
+    const fallback = getFallbackSlots(reservationDate, locallyBookedSlots, reservationSlots);
     setIsLoadingSlots(false);
     setAvailableSlots(fallback);
     setReservationTime((prev) => (fallback.includes(prev) ? prev : fallback[0] ?? ""));
-  }, [guestCount, locallyBookedSlots, reservationDate]);
-
-  const content = mergeRestaurantPageData(data);
+  }, [guestCount, locallyBookedSlots, reservationDate, reservationSlots]);
 
   const heroImage =
     buildSanityImageUrl(data?.heroImage?.asset?._ref, { width: 1600, height: 900 }) ??
-    "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4";
+    fallbackRestaurantImages[0];
 
-  const dishes: SignatureDish[] =
-    content.signatureDishes ?? defaultRestaurantPageContent.signatureDishes ?? [];
+  const dishes: SignatureDish[] = useMemo(() => content.signatureDishes ?? [], [content.signatureDishes]);
 
   const filteredDishes = useMemo(() => {
     return dishes.filter((dish) => {
@@ -225,7 +162,7 @@ function Restaurant() {
   }, [dishes, dietary, spice, search]);
 
   const addToCart = (item: { id: string; name?: string; price?: string }) => {
-    const name = item.name ?? "Menu Item";
+    const name = item.name ?? "";
     const price = parsePrice(item.price);
 
     if (!price) {
@@ -278,7 +215,7 @@ function Restaurant() {
     setCartItems([]);
     setSwipeProgress(0);
     setOrderOtp(otp);
-    setOrderMessage("Order placed successfully. Your kitchen ticket is now live.");
+    setOrderMessage(content.orderSuccessMessage ?? "");
   };
 
   const handleSwipeChange = (value: number) => {
@@ -293,25 +230,25 @@ function Restaurant() {
 
   const contentTitle =
     tab === "signature"
-      ? content.heroTitle ?? "Signature Pizzas"
+      ? content.heroTitle ?? ""
       : tab === "build"
-        ? "Build Your Own"
+        ? content.buildTitle ?? ""
         : tab === "sides"
-          ? "allora Sides"
+          ? content.sidesTitle ?? ""
           : tab === "drinks"
-            ? "Drinks"
-            : "Table Reservations";
+            ? content.drinksTitle ?? ""
+            : content.reservationTabTitle ?? "";
 
   const contentCount =
     tab === "signature"
-      ? `${filteredDishes.length} items available`
+      ? `${filteredDishes.length} ${content.pageSubtitle ?? ""}`
       : tab === "build"
-        ? "Pick your custom combo"
+        ? content.buildDescription ?? ""
         : tab === "sides"
-          ? `${sideItems.length} items available`
+          ? `${sideItems.length} ${content.pageSubtitle ?? ""}`
           : tab === "drinks"
-            ? `${drinkItems.length} items available`
-            : "Book your table in seconds";
+            ? `${drinkItems.length} ${content.pageSubtitle ?? ""}`
+            : content.reservationDescription ?? "";
 
   const submitReservation = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -453,19 +390,19 @@ function Restaurant() {
             </div>
 
             <div className="ac-cta-card">
-              <h4>Build Your Own!</h4>
-              <p>Can&apos;t find what you like? Create your own masterpiece with over 30 toppings.</p>
-              <button type="button" onClick={() => setTab("build")}>Start Building</button>
+              <h4>{content.buildTitle ?? ""}</h4>
+              <p>{content.buildDescription ?? ""}</p>
+              <button type="button" onClick={() => setTab("build")}>{content.buildButtonLabel ?? ""}</button>
             </div>
           </aside>
 
           <section className="ac-content">
             <div className="ac-tabs">
-              <button className={tab === "signature" ? "is-current" : ""} type="button" onClick={() => setTab("signature")}>Signature Pizzas</button>
-              <button className={tab === "build" ? "is-current" : ""} type="button" onClick={() => setTab("build")}>Build Your Own</button>
-              <button className={tab === "sides" ? "is-current" : ""} type="button" onClick={() => setTab("sides")}>Sides</button>
-              <button className={tab === "drinks" ? "is-current" : ""} type="button" onClick={() => setTab("drinks")}>Drinks</button>
-              <button className={tab === "reservation" ? "is-current" : ""} type="button" onClick={() => setTab("reservation")}>Reservations</button>
+              <button className={tab === "signature" ? "is-current" : ""} type="button" onClick={() => setTab("signature")}>{content.heroTitle ?? ""}</button>
+              <button className={tab === "build" ? "is-current" : ""} type="button" onClick={() => setTab("build")}>{content.buildTitle ?? ""}</button>
+              <button className={tab === "sides" ? "is-current" : ""} type="button" onClick={() => setTab("sides")}>{content.sidesTitle ?? ""}</button>
+              <button className={tab === "drinks" ? "is-current" : ""} type="button" onClick={() => setTab("drinks")}>{content.drinksTitle ?? ""}</button>
+              <button className={tab === "reservation" ? "is-current" : ""} type="button" onClick={() => setTab("reservation")}>{content.reservationTabTitle ?? ""}</button>
             </div>
 
             <div className="ac-title-row">
@@ -533,12 +470,12 @@ function Restaurant() {
 
             {tab === "build" ? (
               <section className="ac-builder">
-                <p>Classic base + mozzarella + house sauce + 2 premium toppings.</p>
+                <p>{content.buildDescription ?? ""}</p>
                 <button
                   type="button"
                   onClick={() => addToCart({ id: "custom-pizza", name: "Custom Pizza", price: "$19.00" })}
                 >
-                  Add Custom Pizza ($19.00)
+                  {content.buildButtonLabel ?? ""}
                 </button>
               </section>
             ) : null}
@@ -546,19 +483,25 @@ function Restaurant() {
             {tab === "sides" ? (
               <section className="ac-sides">
                 <div className="ac-title-row">
-                  <h2>allora Sides</h2>
-                  <button type="button" className="ac-link-btn" onClick={() => setTab("sides")}>View all sides</button>
+                  <h2>{content.sidesTitle ?? ""}</h2>
+                  <button type="button" className="ac-link-btn" onClick={() => setTab("sides")}>{content.sidesTitle ?? ""}</button>
                 </div>
                 <div className="ac-sides-grid">
-                  {sideItems.map((item) => (
-                    <article key={item.name}>
+                  {sideItems.map((item, index) => (
+                    <article key={item.id ?? item.name ?? `side-${index}`}>
                       <img src={item.image} alt={item.name} />
                       <div>
                         <h4>{item.name}</h4>
                         <p>{item.price}</p>
                         <button
                           type="button"
-                          onClick={() => addToCart({ id: item.id, name: item.name, price: item.price })}
+                          onClick={() =>
+                            addToCart({
+                              id: item.id ?? `side-${index}-${item.name ?? "item"}`,
+                              name: item.name,
+                              price: item.price,
+                            })
+                          }
                         >
                           + Add to cart
                         </button>
@@ -571,15 +514,21 @@ function Restaurant() {
 
             {tab === "drinks" ? (
               <section className="ac-drinks">
-                {drinkItems.map((drink) => (
-                  <article key={drink.id}>
+                {drinkItems.map((drink, index) => (
+                  <article key={drink.id ?? `drink-${index}`}>
                     <div>
                       <h4>{drink.name}</h4>
                       <p>{drink.price}</p>
                     </div>
                     <button
                       type="button"
-                      onClick={() => addToCart({ id: drink.id, name: drink.name, price: drink.price })}
+                      onClick={() =>
+                        addToCart({
+                          id: drink.id ?? `drink-${index}-${drink.name ?? "item"}`,
+                          name: drink.name,
+                          price: drink.price,
+                        })
+                      }
                     >
                       Add
                     </button>
@@ -626,7 +575,9 @@ function Restaurant() {
                         required
                       >
                         {availableSlots.length === 0 ? (
-                          <option value="">{isLoadingSlots ? "Loading slots..." : "No slots available"}</option>
+                          <option value="">
+                            {isLoadingSlots ? `${content.reservationTitle ?? "Reservations"}...` : content.reservationDescription ?? ""}
+                          </option>
                         ) : (
                           availableSlots.map((slot) => (
                             <option key={slot} value={slot}>
@@ -661,7 +612,7 @@ function Restaurant() {
                   </div>
 
                   <button type="submit" disabled={isSubmittingReservation || availableSlots.length === 0}>
-                    {isSubmittingReservation ? "Confirming..." : "Reserve Table"}
+                    {isSubmittingReservation ? `${content.reserveButtonLabel ?? ""}...` : content.reserveButtonLabel ?? ""}
                   </button>
                 </form>
 
@@ -691,12 +642,12 @@ function Restaurant() {
 
         {cartItems.length === 0 ? (
           <div className="ac-cart-empty">
-            <h4>Your cart is empty</h4>
-            <p>Add a pizza or side to see pricing, delivery, and checkout details.</p>
+            <h4>{content.emptyCartTitle ?? ""}</h4>
+            <p>{content.emptyCartDescription ?? ""}</p>
           </div>
         ) : (
           <>
-            <div className="ac-delivery-pill">Delivery in 25-35 min</div>
+            <div className="ac-delivery-pill">{content.deliveryPillLabel ?? ""}</div>
             <div className="ac-cart-list">
               {cartItems.map((item) => (
                 <div key={item.id} className="ac-cart-item">
@@ -743,11 +694,11 @@ function Restaurant() {
               </div>
             </div>
             <button type="button" className="ac-checkout-btn" onClick={placeOrder}>
-              Proceed to Checkout
+              {content.checkoutButtonLabel ?? ""}
             </button>
             <p className="ac-checkout-note">Secure checkout. You can review your order before final payment.</p>
             <div className="ac-swipe-wrap">
-              <p>Quick order slider</p>
+              <p>{content.quickOrderSliderLabel ?? ""}</p>
               <input
                 className="ac-swipe-input"
                 type="range"
@@ -765,7 +716,7 @@ function Restaurant() {
         {orderMessage ? (
           <div className="ac-order-msg">
             <p>{orderMessage}</p>
-            {orderOtp ? <strong>Your pickup OTP: {orderOtp}</strong> : null}
+            {orderOtp ? <strong>{content.pickupOtpPrefix ?? ""}{orderOtp}</strong> : null}
           </div>
         ) : null}
       </aside>
@@ -791,8 +742,7 @@ function Restaurant() {
               <h2>allora</h2>
             </div>
             <p>
-              Handcrafted pizzas with premium ingredients. Authentic recipes made for the modern
-              palate.
+              {content.footerDescription ?? ""}
             </p>
           </div>
           <div>

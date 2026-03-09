@@ -6,105 +6,7 @@ import { HOME_PAGE_QUERY } from "../lib/queries";
 import { hasSanityConfig, sanityClient } from "../lib/sanity";
 import { buildSanityImageUrl } from "../lib/sanityImage";
 import type { FeaturedPizza, HomePageData, ProcessItem, StatItem } from "../lib/types";
-import {
-  defaultHomePageContent,
-  fallbackRemoteImages,
-  mergeHomePageData,
-} from "./homepage";
-
-const signatureHighlights = [
-  {
-    title: "Slow-Fermented Dough",
-    description: "48-hour fermentation for a crisp crust and airy center.",
-  },
-  {
-    title: "Seasonal Ingredients",
-    description: "Small-batch toppings sourced from trusted local partners.",
-  },
-  {
-    title: "Open Kitchen",
-    description: "Watch every pie fired to perfection in our stone oven.",
-  },
-];
-
-const testimonials = [
-  {
-    quote:
-      "The margherita tastes like Naples with a modern edge. Every bite feels intentional.",
-    name: "Sofia G.",
-    role: "Food Editor",
-  },
-  {
-    quote:
-      "Our Friday ritual: allora, two spritzes, and one extra order to take home.",
-    name: "Marcus L.",
-    role: "Regular Guest",
-  },
-  {
-    quote:
-      "Service is warm, the space is beautiful, and the crust is incredible.",
-    name: "Ava R.",
-    role: "Neighborhood Local",
-  },
-];
-
-const experiencePillars = [
-  {
-    title: "Chef Counter Nights",
-    description: "A 6-seat tasting experience where every course is finished in front of you.",
-    meta: "Tue and Thu",
-  },
-  {
-    title: "Seasonal Pairings",
-    description: "Curated cocktails and natural wines matched to the weekly oven menu.",
-    meta: "Updated weekly",
-  },
-  {
-    title: "After-Hours Dough Lab",
-    description: "Late-evening workshop on fermentation, hydration, and shaping technique.",
-    meta: "Limited seats",
-  },
-];
-
-const editorialMoments = [
-  {
-    title: "Midnight Dough Session",
-    description: "Hydration, folds, and patience. The dough room runs long after service.",
-  },
-  {
-    title: "Char & Balance",
-    description: "A controlled blister on the crust with a soft interior is the benchmark.",
-  },
-  {
-    title: "Plating Ritual",
-    description: "Every pie is finished with oil, herb lift, and final heat before the pass.",
-  },
-  {
-    title: "Table Atmosphere",
-    description: "Warm light, handmade ceramics, and a soundtrack tuned to the room.",
-  },
-];
-
-const serviceMoments = [
-  {
-    title: "Private Dining",
-    description: "Intimate chef-led dinners for celebrations, launches, and curated gatherings.",
-  },
-  {
-    title: "Seasonal Residencies",
-    description: "Collaborations with guest chefs and regional producers every quarter.",
-  },
-  {
-    title: "Tasting Pairings",
-    description: "Progressive pairing flights with natural wines and zero-proof signatures.",
-  },
-];
-
-const weeklyEvents = [
-  { day: "Tuesday", event: "Fermentation Masterclass", time: "7:30 PM" },
-  { day: "Thursday", event: "Chef Counter Experience", time: "8:00 PM" },
-  { day: "Saturday", event: "Live Fire Evenings", time: "9:00 PM" },
-];
+import { fallbackRemoteImages, mergeHomePageData } from "./homepage";
 
 function Home() {
   const [data, setData] = useState<HomePageData | null>(null);
@@ -131,12 +33,17 @@ function Home() {
   const heroHighlight = content.heroHighlight ?? "";
   const heroDescription = content.heroDescription ?? "";
 
-  const heroVideoSrc = "/videos/12456197_2160_3840_25fps.mp4";
+  const heroVideoSrc = content.heroVideoUrl ?? "";
 
-  const processItems: ProcessItem[] = content.process ?? defaultHomePageContent.process ?? [];
-  const statItems: StatItem[] = content.stats ?? defaultHomePageContent.stats ?? [];
-  const featuredPizzas: FeaturedPizza[] =
-    content.featuredPizzas ?? defaultHomePageContent.featuredPizzas ?? [];
+  const processItems: ProcessItem[] = content.process ?? [];
+  const statItems: StatItem[] = content.stats ?? [];
+  const featuredPizzas: FeaturedPizza[] = content.featuredPizzas ?? [];
+  const signatureHighlights = content.signatureHighlights ?? [];
+  const testimonials = content.testimonials ?? [];
+  const experiencePillars = content.experiencePillars ?? [];
+  const editorialMoments = content.editorialMoments ?? [];
+  const serviceMoments = content.serviceMoments ?? [];
+  const weeklyEvents = content.weeklyEvents ?? [];
 
   const heroHeadingParts = (() => {
     if (!heroHighlight || !heroTitle.includes(heroHighlight)) {
@@ -199,7 +106,7 @@ function Home() {
           <motion.div className="nav-actions" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
             <motion.div whileHover={{ y: -2, scale: 1.03 }} whileTap={{ scale: 0.98 }}>
               <Link to="/restaurant" className="primary-btn">
-                Order Now
+                {content.navOrderNowLabel ?? ""}
               </Link>
             </motion.div>
             <motion.div whileHover={{ y: -2, scale: 1.04 }} whileTap={{ scale: 0.96 }}>
@@ -229,7 +136,7 @@ function Home() {
                 fill="#b03518"
               />
             </svg>
-            Signature Fire, Modern Craft
+            {content.heroBadge ?? ""}
           </motion.div>
 
           <motion.h1 variants={revealUp}>
@@ -243,12 +150,12 @@ function Home() {
           <motion.div className="hero-buttons" variants={revealUp}>
             <motion.div whileHover={{ y: -3, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Link to="/restaurant" className="primary-btn large">
-                Reservation
+                {content.heroPrimaryCtaLabel ?? ""}
               </Link>
             </motion.div>
             <motion.div whileHover={{ y: -3, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Link to="/restaurant" className="secondary-btn large">
-                View Menu
+                {content.heroSecondaryCtaLabel ?? ""}
               </Link>
             </motion.div>
           </motion.div>
@@ -291,7 +198,7 @@ function Home() {
             preload="auto"
             aria-label="Pizza making process"
           />
-          <div className="hero-media-tag">Chef Cam Live</div>
+          <div className="hero-media-tag">{content.heroVideoTag ?? ""}</div>
         </motion.div>
       </motion.section>
 
@@ -304,7 +211,7 @@ function Home() {
         transition={{ staggerChildren: 0.12 }}
       >
         <motion.h2 className="crafted-title" variants={revealUp}>
-          Crafted With Intention
+          {content.craftedTitle ?? ""}
         </motion.h2>
         <div className="highlight-grid recipe-layout">
           <motion.div
@@ -349,8 +256,8 @@ function Home() {
         transition={{ staggerChildren: 0.12 }}
       >
         <motion.div className="section-headline" variants={revealUp}>
-          <h2>Beyond The Table</h2>
-          <p>Immersive moments designed for guests who care about craft, ritual, and atmosphere.</p>
+          <h2>{content.experienceTitle ?? ""}</h2>
+          <p>{content.experienceDescription ?? ""}</p>
         </motion.div>
         <div className="experience-grid">
           {experiencePillars.map((pillar) => (
@@ -371,8 +278,8 @@ function Home() {
         viewport={{ once: true, amount: 0.2 }}
         transition={{ staggerChildren: 0.1 }}
       >
-        <motion.h2 variants={revealUp}>The allora Method</motion.h2>
-        <motion.h3 variants={revealUp}>How We Craft Your Pizza</motion.h3>
+        <motion.h2 variants={revealUp}>{content.processTitle ?? ""}</motion.h2>
+        <motion.h3 variants={revealUp}>{content.processSubtitle ?? ""}</motion.h3>
 
         <div className="process-grid">
           {processItems.map((item) => (
@@ -392,8 +299,8 @@ function Home() {
         viewport={{ once: true, amount: 0.2 }}
         transition={{ staggerChildren: 0.1 }}
       >
-        <motion.h2 variants={revealUp}>Popular Choice</motion.h2>
-        <motion.h3 variants={revealUp}>Featured Pizza</motion.h3>
+        <motion.h2 variants={revealUp}>{content.featuredTitle ?? ""}</motion.h2>
+        <motion.h3 variants={revealUp}>{content.featuredSubtitle ?? ""}</motion.h3>
 
         <div className="pizza-grid">
           {featuredPizzas.map((pizza, index) => {
@@ -414,7 +321,7 @@ function Home() {
                   <p className="pizza-tag">Chef Feature</p>
                   <h4>{pizza.name}</h4>
                   <span>{pizza.price}</span>
-                  <Link to="/restaurant">Add to Order</Link>
+                  <Link to="/restaurant">{content.ctaPrimaryLabel ?? ""}</Link>
                 </div>
               </motion.article>
             );
@@ -430,26 +337,19 @@ function Home() {
         transition={{ staggerChildren: 0.12 }}
       >
         <motion.div className="chef-copy" variants={revealUp}>
-          <h2>From The Chef</h2>
+          <h2>{content.chefTitle ?? ""}</h2>
           <p>
-            "Our idea is simple: start with deep fermentation, keep ingredients honest, and finish each pizza with
-            precision that respects both tradition and modern flavor."
+            {content.chefQuote ?? ""}
           </p>
-          <p className="chef-sign">Chef Matteo R.</p>
+          <p className="chef-sign">{content.chefSign ?? ""}</p>
         </motion.div>
         <motion.div className="chef-metrics" variants={revealUp}>
-          <div>
-            <h4>14+</h4>
-            <p>Years of dough research</p>
-          </div>
-          <div>
-            <h4>9</h4>
-            <p>Regional flour blends tested yearly</p>
-          </div>
-          <div>
-            <h4>1000F</h4>
-            <p>Peak oven stone temperature</p>
-          </div>
+          {content.chefMetrics?.map((metric) => (
+            <div key={`${metric.value}-${metric.label}`}>
+              <h4>{metric.value}</h4>
+              <p>{metric.label}</p>
+            </div>
+          ))}
         </motion.div>
       </motion.section>
 
@@ -461,8 +361,8 @@ function Home() {
         transition={{ staggerChildren: 0.1 }}
       >
         <motion.div className="section-headline" variants={revealUp}>
-          <h2>Editorial Notes</h2>
-          <p>Inside the studio where technique meets mood, timing, and relentless detail.</p>
+          <h2>{content.editorialTitle ?? ""}</h2>
+          <p>{content.editorialDescription ?? ""}</p>
         </motion.div>
         <div className="editorial-grid">
           {editorialMoments.map((moment, index) => (
@@ -483,8 +383,8 @@ function Home() {
 
       <section className="service-lab" id="studio-services">
         <div className="section-headline">
-          <h2>Studio Services</h2>
-          <p>Design-forward hospitality experiences crafted for guests who appreciate detail.</p>
+          <h2>{content.studioTitle ?? ""}</h2>
+          <p>{content.studioDescription ?? ""}</p>
         </div>
         <div className="service-grid">
           {serviceMoments.map((item) => (
@@ -504,8 +404,8 @@ function Home() {
         transition={{ staggerChildren: 0.1 }}
       >
         <motion.div className="section-headline" variants={revealUp}>
-          <h2>Weekly Rituals</h2>
-          <p>Reserve a place at our most requested evenings.</p>
+          <h2>{content.weeklyTitle ?? ""}</h2>
+          <p>{content.weeklyDescription ?? ""}</p>
         </motion.div>
         <div className="events-list">
           {weeklyEvents.map((item) => (
@@ -528,8 +428,8 @@ function Home() {
         transition={{ staggerChildren: 0.1 }}
       >
         <motion.div className="section-headline" variants={revealUp}>
-          <h2>What Guests Say</h2>
-          <p>Real words from people who keep coming back for the atmosphere and the flavor.</p>
+          <h2>{content.testimonialsTitle ?? ""}</h2>
+          <p>{content.testimonialsDescription ?? ""}</p>
         </motion.div>
         <div className="testimonial-grid">
           {testimonials.map((item, index) => (
@@ -550,16 +450,16 @@ function Home() {
 
       <section className="newsletter" aria-label="newsletter signup">
         <div>
-          <h2>Table Notes, Straight to Your Inbox</h2>
-          <p>Get seasonal specials, chef picks, and first access to limited weekly menus.</p>
+          <h2>{content.newsletterTitle ?? ""}</h2>
+          <p>{content.newsletterDescription ?? ""}</p>
         </div>
         <form className="newsletter-form" onSubmit={(event) => event.preventDefault()}>
           <label htmlFor="newsletter-email" className="sr-only">
             Email address
           </label>
-          <input id="newsletter-email" type="email" placeholder="Enter your email" />
+          <input id="newsletter-email" type="email" placeholder={content.newsletterPlaceholder ?? ""} />
           <Link to="/contact" className="primary-btn">
-            Subscribe
+            {content.newsletterButtonLabel ?? ""}
           </Link>
         </form>
       </section>
@@ -570,21 +470,21 @@ function Home() {
 
         <div className="cta-buttons">
           <Link to="/restaurant" className="primary-btn">
-            Order Online
+            {content.ctaPrimaryLabel ?? ""}
           </Link>
           <Link to="/restaurant" className="secondary-btn">
-            View Full Menu
+            {content.ctaSecondaryLabel ?? ""}
           </Link>
         </div>
       </section>
 
       <footer className="footer">
         <div>
-          <h3>allora pizza</h3>
-          <p>Traditional craft. Modern Italian energy.</p>
+          <h3>{content.footerBrandTitle ?? ""}</h3>
+          <p>{content.footerTagline ?? ""}</p>
         </div>
 
-        <p>(c) 2026 allora. All rights reserved.</p>
+        <p>{content.footerCopyright ?? ""}</p>
       </footer>
     </div>
   );

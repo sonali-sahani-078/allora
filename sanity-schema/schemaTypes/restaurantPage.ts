@@ -1,4 +1,4 @@
-﻿import { defineField, defineType } from "sanity";
+import { defineArrayMember, defineField, defineType } from "sanity";
 
 export default defineType({
   name: "restaurantPage",
@@ -19,6 +19,23 @@ export default defineType({
       rows: 3,
       validation: (rule) => rule.required(),
     }),
+    defineField({ name: "pageTitle", title: "Default Page Title", type: "string" }),
+    defineField({ name: "pageSubtitle", title: "Default Page Subtitle", type: "string" }),
+    defineField({ name: "buildTitle", title: "Build Tab Title", type: "string" }),
+    defineField({ name: "buildDescription", title: "Build Tab Description", type: "text", rows: 2 }),
+    defineField({ name: "buildButtonLabel", title: "Build Tab Button Label", type: "string" }),
+    defineField({ name: "sidesTitle", title: "Sides Section Title", type: "string" }),
+    defineField({ name: "drinksTitle", title: "Drinks Section Title", type: "string" }),
+    defineField({ name: "reservationTabTitle", title: "Reservation Tab Title", type: "string" }),
+    defineField({ name: "reserveButtonLabel", title: "Reservation Submit Label", type: "string" }),
+    defineField({ name: "checkoutButtonLabel", title: "Checkout Button Label", type: "string" }),
+    defineField({ name: "emptyCartTitle", title: "Empty Cart Title", type: "string" }),
+    defineField({ name: "emptyCartDescription", title: "Empty Cart Description", type: "text", rows: 2 }),
+    defineField({ name: "deliveryPillLabel", title: "Delivery Pill Label", type: "string" }),
+    defineField({ name: "quickOrderSliderLabel", title: "Quick Order Slider Label", type: "string" }),
+    defineField({ name: "orderSuccessMessage", title: "Order Success Message", type: "text", rows: 2 }),
+    defineField({ name: "pickupOtpPrefix", title: "Pickup OTP Prefix", type: "string" }),
+    defineField({ name: "footerDescription", title: "Footer Description", type: "text", rows: 2 }),
     defineField({
       name: "heroImage",
       title: "Hero Image",
@@ -31,8 +48,7 @@ export default defineType({
       title: "Signature Dishes",
       type: "array",
       of: [
-        defineField({
-          name: "signatureDish",
+        defineArrayMember({
           title: "Signature Dish",
           type: "object",
           fields: [
@@ -51,12 +67,48 @@ export default defineType({
       ],
     }),
     defineField({
+      name: "sideItems",
+      title: "Side Items",
+      type: "array",
+      of: [
+        defineArrayMember({
+          type: "object",
+          fields: [
+            defineField({ name: "id", title: "ID", type: "string" }),
+            defineField({ name: "name", title: "Name", type: "string" }),
+            defineField({ name: "price", title: "Price", type: "string" }),
+            defineField({ name: "image", title: "Image URL", type: "url" }),
+          ],
+        }),
+      ],
+    }),
+    defineField({
+      name: "drinkItems",
+      title: "Drink Items",
+      type: "array",
+      of: [
+        defineArrayMember({
+          type: "object",
+          fields: [
+            defineField({ name: "id", title: "ID", type: "string" }),
+            defineField({ name: "name", title: "Name", type: "string" }),
+            defineField({ name: "price", title: "Price", type: "string" }),
+          ],
+        }),
+      ],
+    }),
+    defineField({
+      name: "reservationSlots",
+      title: "Reservation Slots",
+      type: "array",
+      of: [defineArrayMember({ type: "string" })],
+    }),
+    defineField({
       name: "testimonials",
       title: "Testimonials",
       type: "array",
       of: [
-        defineField({
-          name: "testimonial",
+        defineArrayMember({
           title: "Testimonial",
           type: "object",
           fields: [
